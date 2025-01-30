@@ -7,10 +7,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   return (
     <LayoutStyled>
-      <>
-        <Header />
-        <main className="main">{children}</main>
-      </>
+      <Header />
+      <main className="main">{children}</main>
     </LayoutStyled>
   );
 };

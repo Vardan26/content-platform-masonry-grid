@@ -7,4 +7,12 @@ export const LayoutStyled = styled.div`
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease-in-out;
+
+  .main {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1;
+  }
 `;

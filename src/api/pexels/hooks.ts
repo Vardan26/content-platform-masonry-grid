@@ -6,14 +6,13 @@ import {
   InfiniteData,
 } from "@tanstack/react-query";
 import { fetchPhotoById, fetchPhotos } from "./pexels";
-import { Photo } from "./types";
+import { ApiResult } from "./types";
 
 export const usePhotosQuery = (perPage: number = 10, query: string = "") => {
-  console.log("perPage", perPage);
   return useInfiniteQuery<
-    Photo[],
+    ApiResult,
     Error,
-    InfiniteData<Photo[]>,
+    InfiniteData<ApiResult>,
     QueryKey,
     number
   >({
@@ -22,8 +21,8 @@ export const usePhotosQuery = (perPage: number = 10, query: string = "") => {
       const page = context.pageParam ?? 1;
       return fetchPhotos(page, perPage, query);
     },
-    getNextPageParam: (lastPage, allPages) => {
-      return lastPage.length ? allPages.length + 1 : undefined;
+    getNextPageParam: (lastPage) => {
+      return lastPage.next_page ? lastPage.page + 1 : undefined;
     },
     staleTime: 5000,
     initialPageParam: 1,

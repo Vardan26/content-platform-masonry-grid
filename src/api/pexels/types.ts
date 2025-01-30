@@ -1,4 +1,4 @@
-export type Photo = {
+export interface Photo {
   id: number;
   width: number;
   height: number;
@@ -19,4 +19,13 @@ export type Photo = {
   };
   liked: boolean;
   alt: string;
+}
+
+export type ApiResult = {
+  next_page?: string;
+  page: number;
+  per_page: number;
+  photos: Photo[];
+  prev_page?: string;
+  total_results: number;
 };
