@@ -9,7 +9,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
     <LayoutStyled>
       <>
         <Header />
-        {children}
+        <main className="main">{children}</main>
       </>
     </LayoutStyled>
   );
