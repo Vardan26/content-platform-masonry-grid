@@ -23,8 +23,6 @@ export const useHandleScroll = (
     if (!scrollable) return;
 
     const debouncedHandleScroll = debounce(() => {
-      if (!scrollable) return;
-
       const isScrolledToTheEnd =
         scrollable.scrollHeight - scrollable.scrollTop <=
           scrollable.clientHeight + buffer && hasNextPage;

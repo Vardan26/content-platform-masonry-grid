@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { usePhotosQuery } from "../../api/pexels/hooks";
 import { useAllImages, useHandleScroll } from "./Gallery.hooks";
 import { GalleryStyled } from "./Gallery.styled";
@@ -7,15 +7,14 @@ import { ExtendedPhoto } from "./Gallery.utils";
 import { useNavigate } from "react-router-dom";
 import { useImage } from "../../contexts/ImageContext";
 import { useSearch } from "../../contexts/SearchContext";
+import { Loader } from "../../components/loder";
 
 const PHOTOS_PER_PAGE = 20;
 
 export const Gallery = () => {
   const navigate = useNavigate();
   const { setSelectedImage } = useImage();
-
   const { searchQuery } = useSearch();
-
   const galleryRef = useRef<HTMLDivElement | null>(null);
 
   const { data, fetchNextPage, hasNextPage, isLoading, isError } =
@@ -32,6 +31,16 @@ export const Gallery = () => {
     };
   };
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
+
   if (isError && !allImages.length) {
     return <div>Error loading photos.</div>;
   }
@@ -44,12 +53,11 @@ export const Gallery = () => {
             key={`${photo.id}-${index}`}
             src={photo.src.medium}
             className={photo.type}
-            id={photo.id.toString()}
             navigateToDetailView={navigateToDetailView(photo)}
           />
         ))}
 
-        {isLoading && <div className="info">Loading...</div>}
+        {(isLoading || !isMounted) && <Loader />}
         {!isLoading && !allImages.length && searchQuery.length && (
           <div className="info">There are no matches for "{searchQuery}"</div>
         )}

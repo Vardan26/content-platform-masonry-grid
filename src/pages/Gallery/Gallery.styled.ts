@@ -17,5 +17,6 @@ export const GalleryStyled = styled.div<{
     grid-auto-rows: 200px;
     grid-auto-flow: dense;
     width: 100%;
+    margin: auto;
   }
 `;

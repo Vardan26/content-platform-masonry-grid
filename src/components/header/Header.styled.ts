@@ -25,10 +25,10 @@ export const HeaderStyled = styled.header`
     max-width: 50%;
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid ${({ theme }) => theme.border};
     background-color: ${({ theme }) => theme.background};
     padding: 8px 12px;
     transition: 0.3s ease-in-out;
+    margin: 0 auto;
   }
 
   .search-input {

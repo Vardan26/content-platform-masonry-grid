@@ -4,9 +4,9 @@ import { ImageStyled } from "./Image.styled";
 type Props = {
   src: string;
   className: string;
-  id: string;
   navigateToDetailView: MouseEventHandler<HTMLDivElement>;
   ref?: Ref<HTMLDivElement> | undefined;
+  id?: string;
 };
 export const Image = ({
   src,

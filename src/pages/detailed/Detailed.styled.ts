@@ -1,13 +1,17 @@
 import styled from "styled-components";
 
-export const DetailedStyled = styled.div`
+type Props = {
+  src: string;
+};
+
+export const DetailedStyled = styled.div<Props>`
   display: flex;
   justify-content: space-between;
   padding: 20px;
   overflow: hidden;
   flex-grow: 1;
 
-  .image-container {
+  .image {
     flex: 3;
     max-width: 75%;
     display: flex;
@@ -16,12 +20,13 @@ export const DetailedStyled = styled.div`
     overflow: hidden;
     border-bottom-right-radius: 8px;
     border-top-right-radius: 8px;
-  }
+    background-image: url(${(props) => props.src});
+    background-size: cover;
+    background-position: center;
 
-  .main-image {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
+    img {
+      display: none;
+    }
   }
 
   .sidebar {
@@ -32,10 +37,11 @@ export const DetailedStyled = styled.div`
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     border-bottom-left-radius: 8px;
     border-top-left-radius: 8px;
+    display: flex;
+    flex-direction: column;
 
     .title {
       font-size: 24px;
-      margin-bottom: 10px;
     }
 
     .name {
@@ -43,12 +49,8 @@ export const DetailedStyled = styled.div`
     }
 
     .description {
+      margin-top: auto;
       font-size: 16px;
-      margin-bottom: 15px;
-    }
-
-    .author-info {
-      margin-bottom: 20px;
     }
   }
 `;

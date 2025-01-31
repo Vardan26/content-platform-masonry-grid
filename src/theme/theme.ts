@@ -1,8 +1,8 @@
 export const lightTheme = {
   background: "#f2f2f2",
-  text: "#222222",
+  text: "#7e4747",
   border: "#cdcdcd",
-  headerBg: "#d9d9d9",
+  headerBg: "#ddb4b4",
   sidebarBd: "#f9f9f9",
 };
 
