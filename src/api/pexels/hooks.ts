@@ -5,7 +5,7 @@ import {
   QueryKey,
   InfiniteData,
 } from "@tanstack/react-query";
-import { fetchPhotoById, fetchPhotos } from "./pexels";
+import { fetchPhotos } from "./pexels";
 import { ApiResult } from "./types";
 
 export const usePhotosQuery = (perPage: number = 10, query: string = "") => {
@@ -26,13 +26,5 @@ export const usePhotosQuery = (perPage: number = 10, query: string = "") => {
     },
     staleTime: 5000,
     initialPageParam: 1,
-  });
-};
-
-export const usePhotoQuery = (id: string) => {
-  return useQuery({
-    queryKey: ["photo", id],
-    queryFn: () => fetchPhotoById(id),
-    staleTime: 5000,
   });
 };

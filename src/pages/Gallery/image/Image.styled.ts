@@ -14,6 +14,7 @@ export const ImageStyled = styled.div<Props>`
   background-size: cover;
   background-position: center;
   background-color: ${({ theme }) => theme.headerBg};
+  cursor: pointer;
 
   &.wide {
     grid-column: span 2;

@@ -6,46 +6,39 @@ import {
 import { useEffect, useMemo } from "react";
 import { ApiResult, Photo } from "../../api/pexels/types";
 import { getPhotoSizeType } from "./Gallery.utils";
+import { debounce } from "../../helpers";
 
 const buffer = 1000;
 
 export const useHandleScroll = (
+  scrollable: HTMLElement | null,
   fetchNextPage: (
     options?: FetchNextPageOptions
   ) => Promise<
     InfiniteQueryObserverResult<InfiniteData<ApiResult, unknown>, Error>
   >,
-  hasNextPage: boolean,
-  debounceDelay: number = 300
+  hasNextPage: boolean
 ) => {
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout | null = null;
+    if (!scrollable) return;
 
-    const handleScroll = () => {
-      const scrolledToTheEnd =
-        window.innerHeight + document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - buffer && hasNextPage;
+    const debouncedHandleScroll = debounce(() => {
+      if (!scrollable) return;
 
-      if (scrolledToTheEnd) {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
+      const isScrolledToTheEnd =
+        scrollable.scrollHeight - scrollable.scrollTop <=
+          scrollable.clientHeight + buffer && hasNextPage;
 
-        timeoutId = setTimeout(() => {
-          fetchNextPage();
-        }, debounceDelay);
+      if (isScrolledToTheEnd) {
+        fetchNextPage();
       }
-    };
+    }, 200);
 
-    window.addEventListener("scroll", handleScroll);
-
+    scrollable.addEventListener("scroll", debouncedHandleScroll);
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      window.removeEventListener("scroll", handleScroll);
+      scrollable.removeEventListener("scroll", debouncedHandleScroll);
     };
-  }, [fetchNextPage, hasNextPage, debounceDelay]);
+  }, [scrollable, fetchNextPage, hasNextPage]);
 };
 
 export const useAllImages = (pages?: ApiResult[]) => {

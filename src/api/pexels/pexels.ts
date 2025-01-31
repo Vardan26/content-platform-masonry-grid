@@ -16,16 +16,16 @@ export const fetchPhotos = async (
   query?: string
 ): Promise<ApiResult> => {
   const params: Record<string, any> = {
+    query: query || "",
     page,
     per_page: perPage,
   };
 
-  if (query) {
-    params.query = query;
-    const response = await api.get<{ results: ApiResult }>("/search", {
+  if (params.query) {
+    const response = await api.get<ApiResult>("/search", {
       params,
     });
-    return response.data.results;
+    return response.data;
   } else {
     const response = await api.get<ApiResult>("/curated", {
       params,

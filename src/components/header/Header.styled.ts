@@ -6,7 +6,7 @@ export const HeaderStyled = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: ${({ theme }) => "0px 4px 5px rgba(0, 0, 0, 0.1)"};
+  box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.1);
 
   .theme-switcher {
     cursor: pointer;
@@ -18,8 +18,29 @@ export const HeaderStyled = styled.header`
     transform: scale(1.1);
   }
 
-  .logo {
-    font-size: 1.8rem;
-    font-weight: bold;
+  .search-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 50%;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid ${({ theme }) => theme.border};
+    background-color: ${({ theme }) => theme.background};
+    padding: 8px 12px;
+    transition: 0.3s ease-in-out;
+  }
+
+  .search-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background: transparent;
+    color: ${({ theme }) => theme.text};
+  }
+
+  .back-button {
+    cursor: pointer;
   }
 `;
