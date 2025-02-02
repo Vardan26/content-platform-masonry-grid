@@ -4,8 +4,7 @@ import {
   InfiniteData,
 } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
-import { ApiResult, Photo } from "../../api/pexels/types";
-import { getPhotoSizeType } from "./Gallery.utils";
+import { ApiResult } from "../../api/pexels/types";
 import { debounce } from "../../helpers";
 
 const buffer = 1000;
@@ -46,12 +45,5 @@ export const useAllImages = (pages?: ApiResult[]) => {
     return allPhotos;
   }, [pages]);
 
-  const extendedPhotos = flattenedImages.map((image: Photo) => {
-    return {
-      ...image,
-      type: getPhotoSizeType(image.width, image.height),
-    };
-  });
-
-  return extendedPhotos;
+  return flattenedImages;
 };

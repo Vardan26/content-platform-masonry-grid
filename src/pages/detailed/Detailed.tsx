@@ -3,7 +3,7 @@ import { DetailedStyled } from "./Detailed.styled";
 import { useImage } from "../../contexts/ImageContext";
 import { fetchPhotoById } from "../../api/pexels";
 import { useParams } from "react-router-dom";
-import { Loader } from "../../components/loder";
+import { Loader } from "../../components/loader";
 
 export const Detailed = () => {
   const { id } = useParams<{ id: string }>();

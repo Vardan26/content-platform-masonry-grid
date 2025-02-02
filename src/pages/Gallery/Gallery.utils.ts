@@ -1,14 +1,8 @@
-import { Photo } from "../../api/pexels";
-
 export enum PHOTO_SIZE_TYPE {
   WIDE = "wide",
   TALL = "tall",
   BIG = "big",
   SMALL = "small",
-}
-
-export interface ExtendedPhoto extends Photo {
-  type: PHOTO_SIZE_TYPE;
 }
 
 export const getPhotoSizeType = (
