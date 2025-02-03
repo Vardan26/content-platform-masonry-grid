@@ -1,8 +1,6 @@
 import styled from "styled-components";
 
-export const GalleryStyled = styled.div<{
-  ref: React.RefObject<HTMLElement | null>;
-}>`
+export const GalleryStyled = styled.div`
   padding: 20px;
   display: flex;
   justify-content: center;
@@ -18,5 +16,11 @@ export const GalleryStyled = styled.div<{
     grid-auto-flow: dense;
     width: 100%;
     margin: auto;
+  }
+
+  .info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 `;

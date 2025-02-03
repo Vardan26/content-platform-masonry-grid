@@ -43,7 +43,7 @@ export const Detailed = () => {
     : image?.src.medium;
 
   return (
-    <DetailedStyled src={currentImageSrc}>
+    <DetailedStyled src={currentImageSrc} imageBg={image.avg_color}>
       <div className="sidebar">
         <h3 className="name">Author</h3>
         <h2 className="title">{image.photographer}</h2>

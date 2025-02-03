@@ -1,15 +1,15 @@
 export const lightTheme = {
-  background: "#f2f2f2",
+  background: "#DDCFCC",
   text: "#7e4747",
   border: "#cdcdcd",
   headerBg: "#ddb4b4",
-  sidebarBd: "#f9f9f9",
+  sidebarBd: "#f4ecec",
 };
 
 export const darkTheme = {
-  background: "#222222",
+  background: "#434c4d",
   text: "#e0e0e0",
   border: "#aaaaaa",
-  headerBg: "#111111",
-  sidebarBd: "#060606",
+  headerBg: "#1b2529",
+  sidebarBd: "#23353b",
 };

@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 type Props = {
   src: string;
+  imageBg: string;
 };
 
 export const DetailedStyled = styled.div<Props>`
@@ -21,7 +22,9 @@ export const DetailedStyled = styled.div<Props>`
     border-bottom-right-radius: 8px;
     border-top-right-radius: 8px;
     background-image: url(${(props) => props.src});
-    background-size: cover;
+    background-color: ${(props) => props.imageBg};
+    background-size: contain;
+    background-repeat: no-repeat;
     background-position: center;
 
     img {
