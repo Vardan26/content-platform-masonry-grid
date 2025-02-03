@@ -3,14 +3,16 @@ import {
   InfiniteQueryObserverResult,
   InfiniteData,
 } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiResult } from "../../api/pexels/types";
-import { debounce } from "../../helpers";
+import debounce from "lodash/debounce";
+import throttle from "lodash/throttle";
+import { calculatePositions, PhotoExtended } from "./Gallery.utils";
 
 const buffer = 1000;
 
 export const useHandleScroll = (
-  scrollable: HTMLElement | null,
+  wrapperElem: HTMLElement | null,
   fetchNextPage: (
     options?: FetchNextPageOptions
   ) => Promise<
@@ -19,31 +21,145 @@ export const useHandleScroll = (
   hasNextPage: boolean
 ) => {
   useEffect(() => {
-    if (!scrollable) return;
+    if (!wrapperElem) return;
 
     const debouncedHandleScroll = debounce(() => {
       const isScrolledToTheEnd =
-        scrollable.scrollHeight - scrollable.scrollTop <=
-          scrollable.clientHeight + buffer && hasNextPage;
+        wrapperElem.scrollHeight - wrapperElem.scrollTop <=
+          wrapperElem.clientHeight + buffer && hasNextPage;
 
       if (isScrolledToTheEnd) {
         fetchNextPage();
       }
     }, 200);
 
-    scrollable.addEventListener("scroll", debouncedHandleScroll);
+    wrapperElem.addEventListener("scroll", debouncedHandleScroll);
     return () => {
-      scrollable.removeEventListener("scroll", debouncedHandleScroll);
+      wrapperElem.removeEventListener("scroll", debouncedHandleScroll);
     };
-  }, [scrollable, fetchNextPage, hasNextPage]);
+  }, [wrapperElem, fetchNextPage, hasNextPage]);
 };
 
-export const useAllImages = (pages?: ApiResult[]) => {
-  const flattenedImages = useMemo(() => {
-    const allPhotos = pages?.flatMap((page) => page.photos) || [];
+const getColumnCount = (
+  wrapperElem: HTMLElement | null,
+  columnSize = 250
+): number => {
+  const width = wrapperElem?.clientWidth || 0;
 
-    return allPhotos;
-  }, [pages]);
+  let columns = Math.floor(width / columnSize);
 
-  return flattenedImages;
+  if (width <= 768) {
+    columns = 2;
+  }
+
+  if (width <= 480) {
+    columns = 1;
+  }
+
+  return columns;
+};
+
+export const useExtendedPhotos = (
+  wrapperElem: HTMLElement | null,
+  pages?: ApiResult[]
+) => {
+  const [columns, setColumns] = useState(0);
+  const [positionedPhotos, setPositionedPhotos] = useState<PhotoExtended[]>([]);
+
+  // Throttle resize calculations to avoid excessive renders
+  const throttledResize = useMemo(
+    () =>
+      throttle(() => {
+        setColumns(getColumnCount(wrapperElem));
+      }, 500),
+    [wrapperElem]
+  );
+
+  // Handle resizing
+  useEffect(() => {
+    if (!wrapperElem) return;
+    throttledResize();
+
+    window.addEventListener("resize", throttledResize);
+    return () => window.removeEventListener("resize", throttledResize);
+  }, [throttledResize, wrapperElem]);
+
+  useEffect(() => {
+    if (!pages || pages.length === 0 || columns === 0) return;
+
+    const lastPage = pages[pages.length - 1];
+    const lastPageImages = lastPage.photos;
+
+    if (lastPageImages.length === 0) return;
+
+    setPositionedPhotos((prevPhotos) => {
+      // Calculate positions only for new images
+      const newlyPositionedImages = calculatePositions(
+        lastPageImages,
+        columns,
+        wrapperElem,
+        prevPhotos // Pass existing positioned photos for reference
+      );
+
+      return [...prevPhotos, ...newlyPositionedImages];
+    });
+  }, [pages, columns, wrapperElem]);
+
+  return positionedPhotos;
+};
+
+export const useVisiblePhotos = (
+  allPhotos: PhotoExtended[],
+  wrapperElem: HTMLElement | null
+) => {
+  const [visiblePhotos, setVisiblePhotos] = useState<Set<string>>(new Set());
+
+  const updateVisibility = useCallback(() => {
+    const newVisiblePhotos = new Set<string>();
+
+    if (wrapperElem) {
+      const wrapperTop = wrapperElem.scrollTop;
+      const wrapperBottom = wrapperTop + wrapperElem.clientHeight;
+
+      allPhotos.forEach((photo) => {
+        const photoTop = parseFloat(photo.position.top);
+        const photoHeight = parseFloat(photo.position.height);
+        const photoBottom = photoTop + photoHeight;
+
+        // Check if the photo is within the visible area of the wrapper, considering the buffer
+        const isVisible =
+          photoBottom > wrapperTop - buffer &&
+          photoTop < wrapperBottom + buffer;
+
+        if (isVisible) {
+          newVisiblePhotos.add(photo.data.id.toString());
+        }
+      });
+    }
+
+    setVisiblePhotos(newVisiblePhotos);
+  }, [allPhotos, wrapperElem]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const throttleUpdateVisibility = useCallback(
+    throttle(updateVisibility, 100, { leading: true, trailing: true }),
+    [updateVisibility]
+  );
+
+  useEffect(() => {
+    if (wrapperElem) {
+      throttleUpdateVisibility();
+      wrapperElem.addEventListener("scroll", throttleUpdateVisibility, {
+        passive: true,
+      });
+
+      return () => {
+        if (wrapperElem) {
+          wrapperElem.removeEventListener("scroll", throttleUpdateVisibility);
+        }
+      };
+    }
+  }, [throttleUpdateVisibility, wrapperElem]);
+
+  return { visiblePhotos };
 };

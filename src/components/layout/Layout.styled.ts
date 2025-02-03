@@ -6,6 +6,6 @@ export const LayoutStyled = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.1s ease-in-out;
   overflow: hidden;
 `;

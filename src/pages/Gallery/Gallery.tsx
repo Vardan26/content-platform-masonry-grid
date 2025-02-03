@@ -1,13 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePhotosQuery, Photo } from "../../api/pexels";
-import { useAllImages, useHandleScroll } from "./Gallery.hooks";
+import {
+  useVisiblePhotos,
+  useExtendedPhotos,
+  useHandleScroll,
+} from "./Gallery.hooks";
 import { GalleryStyled } from "./Gallery.styled";
 import { Image } from "./image";
 import { useNavigate } from "react-router-dom";
 import { useImage } from "../../contexts/ImageContext";
 import { useSearch } from "../../contexts/SearchContext";
 import { Loader } from "../../components/loader";
-import { getPhotoSizeType } from "./Gallery.utils";
+import { PhotoExtended } from "./Gallery.utils";
 
 const PHOTOS_PER_PAGE = 20;
 
@@ -15,14 +19,20 @@ export const Gallery = () => {
   const navigate = useNavigate();
   const { setSelectedImage } = useImage();
   const { searchQuery } = useSearch();
-  const galleryRef = useRef<HTMLDivElement | null>(null);
+
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   const { data, fetchNextPage, hasNextPage, isLoading, isError } =
     usePhotosQuery(PHOTOS_PER_PAGE, searchQuery);
 
-  useHandleScroll(galleryRef.current, fetchNextPage, hasNextPage);
+  const extendedPhotos = useExtendedPhotos(wrapperRef.current, data?.pages);
 
-  const allImages = useAllImages(data?.pages);
+  const { visiblePhotos } = useVisiblePhotos(
+    extendedPhotos,
+    wrapperRef.current
+  );
+
+  useHandleScroll(wrapperRef.current, fetchNextPage, hasNextPage);
 
   const navigateToDetailView = (photo: Photo) => {
     return () => {
@@ -41,24 +51,31 @@ export const Gallery = () => {
     };
   }, []);
 
-  if (isError && !allImages.length) {
+  if (isError && !extendedPhotos.length) {
     return <div>Error loading photos.</div>;
   }
 
   return (
-    <GalleryStyled ref={galleryRef}>
-      <div className="gallery-container">
-        {allImages.map((photo: Photo, index: number) => (
-          <Image
-            key={`${photo.id}-${index}`}
-            src={photo.src.medium}
-            className={getPhotoSizeType(photo.width, photo.height)}
-            navigateToDetailView={navigateToDetailView(photo)}
-          />
-        ))}
+    <GalleryStyled>
+      <div className="gallery-container" ref={wrapperRef}>
+        {extendedPhotos.map((photo: PhotoExtended, index: number) => {
+          const data = photo.data;
+          return (
+            visiblePhotos.has(data.id.toString()) && (
+              <Image
+                key={`${data.id}-${index}`}
+                src={data.src.medium}
+                className={photo.type}
+                navigateToDetailView={navigateToDetailView(data)}
+                id={data.id.toString()}
+                style={{ ...photo.position }}
+              />
+            )
+          );
+        })}
 
         {(isLoading || !isMounted) && <Loader />}
-        {!isLoading && !allImages.length && searchQuery.length && (
+        {!isLoading && !extendedPhotos.length && searchQuery.length && (
           <div className="info">There are no matches for "{searchQuery}"</div>
         )}
       </div>

@@ -5,6 +5,12 @@ type Props = {
   src: string;
   className: string;
   navigateToDetailView: MouseEventHandler<HTMLDivElement>;
+  style: {
+    top: string;
+    left: string;
+    width: string;
+    height: string;
+  };
   ref?: Ref<HTMLDivElement> | undefined;
   id?: string;
 };
@@ -14,6 +20,7 @@ export const Image = ({
   id,
   ref,
   navigateToDetailView,
+  style,
 }: Props) => {
   return (
     <ImageStyled
@@ -22,6 +29,7 @@ export const Image = ({
       id={id}
       ref={ref}
       onClick={navigateToDetailView}
+      style={style}
     />
   );
 };

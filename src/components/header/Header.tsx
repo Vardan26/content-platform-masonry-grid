@@ -3,8 +3,8 @@ import { HeaderStyled } from "./Header.styled";
 import { useTheme } from "../../contexts/ThemeContext";
 import { Moon, Sun, ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { debounce } from "../../helpers";
 import { useSearch } from "../../contexts/SearchContext";
+import { debounce } from "lodash";
 
 export const Header = () => {
   const navigate = useNavigate();
