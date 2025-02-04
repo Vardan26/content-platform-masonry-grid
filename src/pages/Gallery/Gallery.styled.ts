@@ -13,7 +13,7 @@ export const GalleryStyled = styled.div`
     position: relative;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     flex: 1;
     overflow: auto;
     height: 100%;

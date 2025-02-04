@@ -29,6 +29,7 @@ export const HeaderStyled = styled.header`
     padding: 8px 12px;
     transition: 0.3s ease-in-out;
     margin: 0 auto;
+    position: relative;
   }
 
   .search-input {
@@ -46,5 +47,11 @@ export const HeaderStyled = styled.header`
 
   .back-button {
     cursor: pointer;
+  }
+
+  .clear-button {
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
   }
 `;

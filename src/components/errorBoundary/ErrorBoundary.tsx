@@ -1,5 +1,6 @@
 import React from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
+import { ErrorBoundaryStyled } from "./ErrorBoundary.Styled";
 
 const ErrorFallback = ({
   error,
@@ -8,11 +9,11 @@ const ErrorFallback = ({
   error: Error;
   resetErrorBoundary: () => void;
 }) => (
-  <div role="alert">
+  <ErrorBoundaryStyled role="alert">
     <p>Something went wrong:</p>
     <pre>{error.message}</pre>
     <button onClick={resetErrorBoundary}>Try again</button>
-  </div>
+  </ErrorBoundaryStyled>
 );
 
 export const ErrorBoundary: React.FC<{ children: React.ReactNode }> = ({
