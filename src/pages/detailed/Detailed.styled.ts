@@ -56,4 +56,29 @@ export const DetailedStyled = styled.div<Props>`
       font-size: 16px;
     }
   }
+
+  @media all and (max-width: 768px) {
+    padding: 10px;
+    flex-direction: column-reverse;
+
+    .image {
+      max-width: 100%;
+      height: 75%;
+
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .sidebar {
+      max-width: 100%;
+
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+  }
 `;

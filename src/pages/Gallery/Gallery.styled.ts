@@ -24,4 +24,8 @@ export const GalleryStyled = styled.div`
     align-items: center;
     justify-content: center;
   }
+
+  @media all and (max-width: 768px) {
+    padding: 10px;
+  }
 `;

@@ -23,7 +23,7 @@ export const getColumnCount = (
 ): number => {
   const width = wrapperElem?.clientWidth || 0;
 
-  let columns = Math.floor(width / columnSize);
+  let columns = Math.ceil(width / columnSize);
 
   if (width <= 768) {
     columns = 2;
@@ -46,6 +46,7 @@ export const calculatePositions = <Photo>(
 
   const containerWidth = wrapperElem.clientWidth;
   const columnWidth = containerWidth / columns;
+  const columnHeights = new Array(columns).fill(0);
 
   const imageDimensions = {
     small: { width: columnWidth, height: columnWidth },
@@ -60,7 +61,6 @@ export const calculatePositions = <Photo>(
     },
   };
 
-  const columnHeights = new Array(columns).fill(0);
   const positionedImages: PhotoExtended<Photo>[] = [];
 
   images.forEach((image) => {
