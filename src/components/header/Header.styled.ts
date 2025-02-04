@@ -38,6 +38,10 @@ export const HeaderStyled = styled.header`
     font-size: 16px;
     background: transparent;
     color: ${({ theme }) => theme.text};
+
+    &::placeholder {
+      color: ${({ theme }) => theme.text};
+    }
   }
 
   .back-button {

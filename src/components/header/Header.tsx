@@ -28,7 +28,7 @@ export const Header = () => {
   return (
     <HeaderStyled>
       {id ? (
-        <span onClick={() => navigate(-1)} className="back-button">
+        <span onClick={() => navigate(`/`)} className="back-button">
           <ArrowLeft size={24} />
         </span>
       ) : (
