@@ -1,4 +1,9 @@
-import { PHOTO_SIZE_TYPE, PhotoExtended, PhotoKeys } from "./types";
+import {
+  ImageDimensions,
+  PHOTO_SIZE_TYPE,
+  PhotoExtended,
+  PhotoKeys,
+} from "./types";
 
 export const getPhotoSizeType = (
   width: number,
@@ -36,34 +41,27 @@ export const getColumnCount = (
   return columns;
 };
 
+// Store already calculated and positioned images to prevent recalculation
+const calculatedImages: Record<string, {}> = {};
+
 export const calculatePositions = <Photo>(
   images: Photo[],
-  columns: number,
-  wrapperElem: HTMLElement | null,
-  sizeKeys: PhotoKeys<Photo>
+  imageSizes: {
+    columns: number;
+    columnWidth: number;
+    columnHeights: any[];
+    imageDimensions: ImageDimensions;
+  },
+  sizeKeys: PhotoKeys<Photo>,
+  isColumnsChanged: boolean
 ): PhotoExtended<Photo>[] => {
-  if (!wrapperElem) return [];
-
-  const containerWidth = wrapperElem.clientWidth;
-  const columnWidth = containerWidth / columns;
-  const columnHeights = new Array(columns).fill(0);
-
-  const imageDimensions = {
-    small: { width: columnWidth, height: columnWidth },
-    wide: {
-      width: columns > 2 ? columnWidth * 2 : columnWidth,
-      height: columnWidth,
-    },
-    tall: { width: columnWidth, height: columnWidth * 2 },
-    big: {
-      width: columns > 2 ? columnWidth * 2 : columnWidth,
-      height: columnWidth * 2,
-    },
-  };
-
-  const positionedImages: PhotoExtended<Photo>[] = [];
+  const { columns, columnWidth, columnHeights, imageDimensions } = imageSizes;
 
   images.forEach((image) => {
+    const idKey = (sizeKeys.id && image[sizeKeys.id]) as number;
+    const id = idKey.toString();
+
+    if (!isColumnsChanged && calculatedImages[id]) return;
     // Access width and height dynamically
     const width = (sizeKeys.width && Number(image[sizeKeys.width])) || 0;
     const height = (sizeKeys.height && Number(image[sizeKeys.height])) || 0;
@@ -78,7 +76,6 @@ export const calculatePositions = <Photo>(
     const { width: itemWidth, height: itemHeight } = imageDimensions[type];
     const slotsRequired = Math.min(columns, Math.ceil(itemWidth / columnWidth));
 
-    // Find the best starting column by checking the lowest max height
     let bestColumn = 0;
     let minTop = Infinity;
 
@@ -95,7 +92,13 @@ export const calculatePositions = <Photo>(
 
     const left = bestColumn * columnWidth;
 
-    positionedImages.push({
+    // Update column heights in-place
+    const newHeight = minTop + itemHeight;
+    for (let i = bestColumn; i < bestColumn + slotsRequired; i++) {
+      columnHeights[i] = newHeight;
+    }
+
+    calculatedImages[id] = {
       data: image,
       type,
       position: {
@@ -104,14 +107,8 @@ export const calculatePositions = <Photo>(
         width: `${itemWidth}px`,
         height: `${itemHeight}px`,
       },
-    });
-
-    // Update column heights in-place
-    const newHeight = minTop + itemHeight;
-    for (let i = bestColumn; i < bestColumn + slotsRequired; i++) {
-      columnHeights[i] = newHeight;
-    }
+    };
   });
 
-  return positionedImages;
+  return Object.values(calculatedImages) as PhotoExtended<Photo>[];
 };

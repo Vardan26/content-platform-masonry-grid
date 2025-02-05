@@ -5,6 +5,15 @@ export enum PHOTO_SIZE_TYPE {
   SMALL = "small",
 }
 
+type ImagSizes = { width: number; height: number };
+
+export type ImageDimensions = {
+  small: ImagSizes;
+  wide: ImagSizes;
+  tall: ImagSizes;
+  big: ImagSizes;
+};
+
 export type PhotoExtended<Photo> = {
   data: Photo;
   type: PHOTO_SIZE_TYPE;

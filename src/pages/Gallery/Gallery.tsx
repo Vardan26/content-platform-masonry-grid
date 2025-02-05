@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { Photo, usePhotosQuery } from "../../api/pexels";
 import { useVirtualized, PhotoExtended } from "../../libs/virtualized-gallery";
 import { GalleryStyled } from "./Gallery.styled";
@@ -17,19 +17,20 @@ export const Gallery = () => {
   const { setSelectedImage } = useImage();
   const { searchQuery } = useSearch();
 
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
-
   const { data, fetchNextPage, hasNextPage, isLoading, isError } =
     usePhotosQuery(PHOTOS_PER_PAGE, searchQuery);
 
-  const { visiblePhotos, showScrollButton } = useVirtualized(
-    wrapperRef.current,
+  const { visiblePhotos, showScrollButton, wrapperRef } = useVirtualized(
     data,
     hasNextPage,
     fetchNextPage,
     photoKeys,
     resultDataKeys
-  ) as { visiblePhotos: PhotoExtended<Photo>[]; showScrollButton: boolean };
+  ) as {
+    visiblePhotos: PhotoExtended<Photo>[];
+    showScrollButton: boolean;
+    wrapperRef: React.RefObject<HTMLDivElement | null>;
+  };
 
   const navigateToDetailView = (photo: Photo) => {
     return () => {
@@ -42,26 +43,24 @@ export const Gallery = () => {
     return <div>Error loading photos.</div>;
   }
 
-  if (isLoading) {
-    return <Loader />;
-  }
-
   return (
     <GalleryStyled>
       <div className="gallery-container" ref={wrapperRef}>
-        {visiblePhotos.map((photo: PhotoExtended<Photo>) => {
-          const data = photo.data;
-          return (
-            <Image
-              key={data.id}
-              src={data.src.large}
-              className={photo.type}
-              navigateToDetailView={navigateToDetailView(data)}
-              id={data.id.toString()}
-              style={{ ...photo.position }}
-            />
-          );
-        })}
+        {!isLoading &&
+          visiblePhotos.map((photo: PhotoExtended<Photo>) => {
+            const data = photo.data;
+            return (
+              <Image
+                key={data.id}
+                src={data.src.large}
+                className={photo.type}
+                navigateToDetailView={navigateToDetailView(data)}
+                id={data.id.toString()}
+                style={{ ...photo.position }}
+              />
+            );
+          })}
+        {isLoading && <Loader />}
 
         {!isLoading && !visiblePhotos.length && searchQuery.length ? (
           <div className="info">There are no matches for "{searchQuery}"</div>

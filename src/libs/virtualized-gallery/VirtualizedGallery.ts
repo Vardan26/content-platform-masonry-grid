@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import debounce from "lodash/debounce";
 import throttle from "lodash/throttle";
 import { calculatePositions, getColumnCount } from "./utils";
@@ -8,7 +8,12 @@ import {
   InfiniteData,
   InfiniteQueryObserverResult,
 } from "@tanstack/react-query";
-import { ResultDataKeys, PhotoExtended, PhotoKeys } from "./types";
+import {
+  ResultDataKeys,
+  PhotoExtended,
+  PhotoKeys,
+  ImageDimensions,
+} from "./types";
 
 const buffer = 500;
 
@@ -44,19 +49,52 @@ const useInfiniteScroll = (
 };
 
 // Process and position images
+
+const getImageSizes = (columns: number, wrapperElemWidth: number) => {
+  const containerWidth = wrapperElemWidth || 0;
+  const columnWidth = containerWidth / columns || 0;
+  const columnHeights = new Array(columns).fill(0) || 0;
+
+  const imageDimensions: ImageDimensions = {
+    small: { width: columnWidth, height: columnWidth },
+    wide: {
+      width: columns > 2 ? columnWidth * 2 : columnWidth,
+      height: columnWidth,
+    },
+    tall: { width: columnWidth, height: columnWidth * 2 },
+    big: {
+      width: columns > 2 ? columnWidth * 2 : columnWidth,
+      height: columnWidth * 2,
+    },
+  };
+
+  return {
+    columns,
+    columnWidth,
+    columnHeights,
+    imageDimensions,
+  };
+};
+
 const usePositionedImages = <ApiResult, Photo>(
   data: InfiniteData<ApiResult, unknown> | undefined,
-  columns: number,
   wrapperElem: HTMLElement | null,
   photoKeys: PhotoKeys<Photo>,
   resultDataKeys: ResultDataKeys<ApiResult>
 ) => {
+  const { columns, isColumnsChanged } = useColumns(wrapperElem);
+
   const [positionedImages, setPositionedImages] = useState<
     PhotoExtended<Photo>[]
   >([]);
 
+  const imageSizes = useMemo(
+    () => getImageSizes(columns, wrapperElem?.clientWidth || 0),
+    [columns, wrapperElem]
+  );
+
   useEffect(() => {
-    if (!data) return;
+    if (!data || !columns) return;
 
     const flattenedImages = data.pages.flatMap(
       (page) => resultDataKeys.photos && page[resultDataKeys.photos]
@@ -64,13 +102,20 @@ const usePositionedImages = <ApiResult, Photo>(
 
     const extendedImages = calculatePositions(
       flattenedImages,
-      columns,
-      wrapperElem,
-      photoKeys
+      imageSizes,
+      photoKeys,
+      isColumnsChanged
     );
 
     setPositionedImages(extendedImages);
-  }, [data, columns, wrapperElem, photoKeys, resultDataKeys]);
+  }, [
+    columns,
+    data,
+    imageSizes,
+    photoKeys,
+    resultDataKeys.photos,
+    isColumnsChanged,
+  ]);
 
   return positionedImages;
 };
@@ -89,8 +134,6 @@ const useHandleScroll = <ApiResult, Photo>(
   resultDataKeys: ResultDataKeys<ApiResult>,
   setShowScrollButton: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  const columns = useColumns(wrapperElem);
-
   useInfiniteScroll(
     wrapperElem,
     hasNextPage,
@@ -100,7 +143,6 @@ const useHandleScroll = <ApiResult, Photo>(
 
   const positionedImages = usePositionedImages(
     data,
-    columns,
     wrapperElem,
     photoKeys,
     resultDataKeys
@@ -111,10 +153,18 @@ const useHandleScroll = <ApiResult, Photo>(
 
 const useColumns = (wrapperElem: HTMLElement | null) => {
   const [columns, setColumns] = useState(0);
+  const [prevColumns, setPrevColumns] = useState<number | undefined>(undefined);
+  const [isColumnsChanged, setIsColumnsChanged] = useState(false);
 
   const throttledResize = throttle(() => {
     setColumns(getColumnCount(wrapperElem));
   }, 500);
+
+  useEffect(() => {
+    setIsColumnsChanged(!!prevColumns && columns !== prevColumns);
+
+    setPrevColumns(columns);
+  }, [columns, prevColumns]);
 
   useEffect(() => {
     if (!wrapperElem) return;
@@ -124,7 +174,7 @@ const useColumns = (wrapperElem: HTMLElement | null) => {
     return () => window.removeEventListener("resize", throttledResize);
   }, [throttledResize, wrapperElem]);
 
-  return columns;
+  return { columns, isColumnsChanged };
 };
 
 const useVisiblePhotos = <Photo>(
@@ -189,7 +239,7 @@ const useVisiblePhotos = <Photo>(
 };
 
 export const useVirtualized = <ApiResult, Photo>(
-  wrapperElem: HTMLElement | null,
+  // wrapperElem: HTMLElement | null,
   data: InfiniteData<ApiResult, unknown> | undefined,
   hasNextPage: boolean,
   fetchNextPage: (
@@ -200,10 +250,19 @@ export const useVirtualized = <ApiResult, Photo>(
   photoKeys: PhotoKeys<Photo>,
   resultDataKeys: ResultDataKeys<ApiResult>
 ) => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_savedRef, setSavedRef] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (wrapperRef.current) {
+      setSavedRef(wrapperRef.current);
+    }
+  }, []);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   const { positionedImages } = useHandleScroll<ApiResult, Photo>(
-    wrapperElem,
+    wrapperRef.current,
     data,
     hasNextPage,
     fetchNextPage,
@@ -214,7 +273,7 @@ export const useVirtualized = <ApiResult, Photo>(
 
   const { visiblePhotoIds } = useVisiblePhotos(
     positionedImages,
-    wrapperElem,
+    wrapperRef.current,
     photoKeys
   );
 
@@ -227,5 +286,6 @@ export const useVirtualized = <ApiResult, Photo>(
   return {
     visiblePhotos,
     showScrollButton: showScrollButton,
+    wrapperRef,
   };
 };
