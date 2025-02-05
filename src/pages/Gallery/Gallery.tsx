@@ -10,7 +10,7 @@ import { Loader } from "../../components/loader";
 import { photoKeys, resultDataKeys } from "./Gallery.constants";
 import { ScrollTopIcon } from "../../libs/virtualized-gallery/scroll-top-button";
 
-const PHOTOS_PER_PAGE = 20;
+const PHOTOS_PER_PAGE = 40;
 
 export const Gallery = () => {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ export const Gallery = () => {
           return (
             <Image
               key={data.id}
-              src={data.src.medium}
+              src={data.src.large}
               className={photo.type}
               navigateToDetailView={navigateToDetailView(data)}
               id={data.id.toString()}
@@ -63,9 +63,9 @@ export const Gallery = () => {
           );
         })}
 
-        {!isLoading && !visiblePhotos.length && searchQuery.length && (
+        {!isLoading && !visiblePhotos.length && searchQuery.length ? (
           <div className="info">There are no matches for "{searchQuery}"</div>
-        )}
+        ) : null}
       </div>
 
       <ScrollTopIcon
